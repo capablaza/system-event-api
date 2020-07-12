@@ -1,0 +1,11 @@
+CREATE TABLE event(
+	id serial PRIMARY KEY,
+	operation VARCHAR (100) NOT NULL,
+	description VARCHAR (300) NOT NULL,
+	created_at TIMESTAMP NOT NULL
+);
+
+
+CREATE DATABASE events;
+CREATE USER logmaster WITH ENCRYPTED PASSWORD '9!h$%Ple1';
+GRANT ALL PRIVILEGES ON DATABASE events TO logmaster;
