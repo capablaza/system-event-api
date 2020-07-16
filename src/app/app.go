@@ -44,7 +44,7 @@ func getEvents(w http.ResponseWriter, r *http.Request) {
 		eventsCreated = append(eventsCreated, nevent)
 	}
 
-	response(w, r, eventsCreated, http.StatusOK)
+	response(w, eventsCreated, http.StatusOK)
 }
 
 func addEvent(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +79,7 @@ func addEvent(w http.ResponseWriter, r *http.Request) {
 
 	var events []Event
 	events = append(events, newEvent)
-	response(w, r, events, http.StatusOK)
+	response(w, events, http.StatusOK)
 }
 
 func validateEventInputData(w http.ResponseWriter, newEvent Event) bool {

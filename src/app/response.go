@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func response(w http.ResponseWriter, r *http.Request, data []Event, status int) {
+func response(w http.ResponseWriter, data []Event, status int) {
 	w = prepareResponse(w, status)
 	json.NewEncoder(w).Encode(data)
 }
