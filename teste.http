@@ -8,8 +8,8 @@ POST http://localhost:5000/events
 Content-Type: application/json
 
 {
-  "operation": "",
-  "description" : ""
+  "operation": "new service",
+  "description" : "services testing for simple test"
 }
 
 ###
