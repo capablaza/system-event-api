@@ -11,6 +11,48 @@ import (
 	"time"
 )
 
+func findEventByOperation(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	operation := vars["operation"]
+
+	log.Println("operation: " + operation)
+
+	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
+		DbUser, DbPassword, DbName)
+	db, err := sql.Open("postgres", dbinfo)
+	if checkErr(err, w, InternalError) {
+		return
+	}
+	defer db.Close()
+
+	queryStr := "SELECT operation, description, created_at FROM event WHERE operation = $1"
+	rows, err := db.Query(queryStr, operation)
+	if checkErr(err, w, InternalError) {
+		return
+	}
+	var eventsCreated []Event
+
+	for rows.Next() {
+		var op string
+		var desc string
+		var created time.Time
+		err = rows.Scan(&op, &desc, &created)
+		if checkErr(err, w, InternalError) {
+			return
+		}
+
+		nevent := Event{
+			Operation:   op,
+			Description: desc,
+			CreatedAt:   created,
+		}
+		eventsCreated = append(eventsCreated, nevent)
+	}
+
+	response(w, eventsCreated, http.StatusOK)
+
+}
+
 func getEvents(w http.ResponseWriter, r *http.Request) {
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		DbUser, DbPassword, DbName)
@@ -99,6 +141,7 @@ func main() {
 	serviceName := "/events"
 
 	router.HandleFunc(serviceName, getEvents).Methods(http.MethodGet)
+	router.HandleFunc(serviceName+"/{operation}", findEventByOperation).Methods(http.MethodGet)
 	router.HandleFunc(serviceName, addEvent).Methods(http.MethodPost)
 	log.Fatal(http.ListenAndServe(":5000", router))
 }
