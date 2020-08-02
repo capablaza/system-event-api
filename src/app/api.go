@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -76,6 +77,6 @@ func main() {
 
 	a := &App{}
 	appPort := ":5000"
-	a.Initialize(DbUser, DbPassword, DbName)
+	a.Initialize(os.Getenv(DbHost), os.Getenv(DbPort), os.Getenv(DbUser), os.Getenv(DbPassword), os.Getenv(DbName))
 	a.Run(appPort)
 }

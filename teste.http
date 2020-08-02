@@ -4,7 +4,7 @@
 #  --request POST
 #  --data '{"username":"xyz","password":"xyz"}'
 #  http://localhost:3000/api/login
-POST http://localhost:5000/events
+POST http://localhost:9090/events
 Content-Type: application/json
 
 {
@@ -14,7 +14,7 @@ Content-Type: application/json
 
 
 ###
-GET http://localhost:5000/events/gdghgfd
+GET http://localhost:9090/events/gdghgfd
 
 ###
-GET http://localhost:5000/events
+GET http://localhost:9090/events

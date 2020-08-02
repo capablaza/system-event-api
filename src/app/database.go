@@ -1,7 +1,9 @@
 package main
 
 const (
-	DbUser     = "logmaster"
-	DbPassword = "9!h$%Ple1"
-	DbName     = "events"
+	DbHost     = "DbHost"
+	DbPort     = "DbPort"
+	DbUser     = "DbUser"
+	DbPassword = "DbPassword"
+	DbName     = "DbName"
 )

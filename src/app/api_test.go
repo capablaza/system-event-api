@@ -52,7 +52,7 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 }
 
 func TestMain(m *testing.M) {
-	a.Initialize(DbUser, DbPassword, DbName)
+	a.Initialize(os.Getenv(DbHost), os.Getenv(DbPort), os.Getenv(DbUser), os.Getenv(DbPassword), os.Getenv(DbName))
 	droptable()
 	ensureTableExists()
 	code := m.Run()
