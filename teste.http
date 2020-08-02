@@ -8,13 +8,13 @@ POST http://localhost:5000/events
 Content-Type: application/json
 
 {
-  "operation": "addservice",
+  "operation": "op1212",
   "description" : "services testing for simple test"
 }
 
 
 ###
-GET http://localhost:5000/events/addservice
+GET http://localhost:5000/events/gdghgfd
 
 ###
 GET http://localhost:5000/events

@@ -6,14 +6,17 @@ import (
 	"net/http"
 )
 
-func response(w http.ResponseWriter, data []Event, status int) {
+func response(w http.ResponseWriter, data interface{}, status int) {
 	w = prepareResponse(w, status)
-	json.NewEncoder(w).Encode(data)
+	response, _ := json.Marshal(data)
+	w.Write(response)
 }
 
-func responseError(w http.ResponseWriter, message Message, status int) {
-	w = prepareResponse(w, status)
-	json.NewEncoder(w).Encode(message)
+func responseError(w http.ResponseWriter, msgDescription string, status int) {
+	message := Message{
+		Description: msgDescription,
+	}
+	response(w, message, status)
 }
 
 func prepareResponse(w http.ResponseWriter, status int) http.ResponseWriter {
@@ -22,13 +25,10 @@ func prepareResponse(w http.ResponseWriter, status int) http.ResponseWriter {
 	return w
 }
 
-func checkErr(err error, w http.ResponseWriter, errorMessage string) bool {
+func checkErr(err error, w http.ResponseWriter, errorMessage string, statusCode int) bool {
 	if err != nil {
-		message := Message{
-			Description: errorMessage,
-		}
 		log.Println("error: ", err.Error())
-		responseError(w, message, http.StatusBadRequest)
+		responseError(w, errorMessage, statusCode)
 		return true
 	}
 	return false

@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"log"
@@ -11,137 +11,72 @@ import (
 	"time"
 )
 
-func findEventByOperation(w http.ResponseWriter, r *http.Request) {
+func (a *App) findEventByOperation(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	operation := vars["operation"]
-
 	log.Println("operation: " + operation)
+	event := Event{Operation: operation}
 
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-		DbUser, DbPassword, DbName)
-	db, err := sql.Open("postgres", dbinfo)
-	if checkErr(err, w, InternalError) {
+	if err := event.getEventByOperation(a.DB); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			responseError(w, "Event not found", http.StatusNotFound)
+		default:
+			responseError(w, "Service not Available", http.StatusServiceUnavailable)
+		}
 		return
 	}
-	defer db.Close()
 
-	queryStr := "SELECT operation, description, created_at FROM event WHERE operation = $1"
-	rows, err := db.Query(queryStr, operation)
-	if checkErr(err, w, InternalError) {
-		return
-	}
-	var eventsCreated []Event
-
-	for rows.Next() {
-		var op string
-		var desc string
-		var created time.Time
-		err = rows.Scan(&op, &desc, &created)
-		if checkErr(err, w, InternalError) {
-			return
-		}
-
-		nevent := Event{
-			Operation:   op,
-			Description: desc,
-			CreatedAt:   created,
-		}
-		eventsCreated = append(eventsCreated, nevent)
-	}
-
-	response(w, eventsCreated, http.StatusOK)
+	response(w, event, http.StatusOK)
 
 }
 
-func getEvents(w http.ResponseWriter, r *http.Request) {
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-		DbUser, DbPassword, DbName)
-	db, err := sql.Open("postgres", dbinfo)
-	if checkErr(err, w, InternalError) {
+func (a *App) getEvents(w http.ResponseWriter, r *http.Request) {
+	events, err := getAllEvents(a.DB)
+	if checkErr(err, w, InternalError, http.StatusServiceUnavailable) {
 		return
 	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT operation, description, created_at FROM event")
-	if checkErr(err, w, InternalError) {
-		return
-	}
-
-	var eventsCreated []Event
-
-	for rows.Next() {
-		var op string
-		var desc string
-		var created time.Time
-		err = rows.Scan(&op, &desc, &created)
-		if checkErr(err, w, InternalError) {
-			return
-		}
-
-		nevent := Event{
-			Operation:   op,
-			Description: desc,
-			CreatedAt:   created,
-		}
-		eventsCreated = append(eventsCreated, nevent)
-	}
-
-	response(w, eventsCreated, http.StatusOK)
+	response(w, events, http.StatusOK)
 }
 
-func addEvent(w http.ResponseWriter, r *http.Request) {
-	var newEvent Event
+func (a *App) addEvent(w http.ResponseWriter, r *http.Request) {
+	var event Event
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&newEvent)
 
-	if checkErr(err, w, InternalError) {
+	if err := decoder.Decode(&event); err != nil {
+		responseError(w, BadRequestError, http.StatusBadRequest)
 		return
 	}
 
-	if validateEventInputData(w, newEvent) {
+	if err := validateEventInputData(event); err != nil {
+		responseError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	currentTime := time.Now()
-	newEvent.CreatedAt = currentTime
+	event.CreatedAt = currentTime
 
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-		DbUser, DbPassword, DbName)
-	db, err := sql.Open("postgres", dbinfo)
-	if checkErr(err, w, InternalError) {
-		return
-	}
-	defer db.Close()
+	defer r.Body.Close()
 
-	var lastInsertId int
-	err = db.QueryRow("INSERT INTO event(operation, description, created_at) VALUES($1,$2,$3)  returning id;", newEvent.Operation, newEvent.Description, newEvent.CreatedAt).Scan(&lastInsertId)
-	if checkErr(err, w, InternalError) {
+	if err := event.addEvent(a.DB); err != nil {
+		responseError(w, InternalError, http.StatusInternalServerError)
 		return
 	}
 
-	var events []Event
-	events = append(events, newEvent)
-	response(w, events, http.StatusOK)
+	response(w, event, http.StatusOK)
 }
 
-func validateEventInputData(w http.ResponseWriter, newEvent Event) bool {
+func validateEventInputData(newEvent Event) error {
 	if newEvent.Operation == "" || newEvent.Description == "" {
-		message := Message{
-			Description: "Can't add empty events",
-		}
-		responseError(w, message, http.StatusBadRequest)
-		return true
+		return errors.New("can't add empty events")
 	}
-	return false
+	return nil
 }
 
 func main() {
-	router := mux.NewRouter()
 
-	serviceName := "/events"
-
-	router.HandleFunc(serviceName, getEvents).Methods(http.MethodGet)
-	router.HandleFunc(serviceName+"/{operation}", findEventByOperation).Methods(http.MethodGet)
-	router.HandleFunc(serviceName, addEvent).Methods(http.MethodPost)
-	log.Fatal(http.ListenAndServe(":5000", router))
+	a := &App{}
+	appPort := ":5000"
+	a.Initialize(DbUser, DbPassword, DbName)
+	a.Run(appPort)
 }
