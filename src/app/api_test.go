@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -30,6 +32,10 @@ func ensureTableExists() {
 func clearTable() {
 	a.DB.Exec("DELETE FROM event")
 	a.DB.Exec("ALTER SEQUENCE event_id_seq RESTART WITH 1")
+}
+
+func loadEvents() {
+	a.DB.Exec("INSERT INTO event(operation, description, created_at) values ('operation1', 'operation for testing', now())")
 }
 
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
@@ -65,4 +71,36 @@ func TestEmptyTable(t *testing.T) {
 	if body := response.Body.String(); body != "null" {
 		t.Errorf("Expected an empty array. Got %s", body)
 	}
+}
+
+func TestCreateEvent(t *testing.T) {
+	clearTable()
+
+	var jsonStr = []byte(`{"operation": "saveuser", "description" : "add new user on the system"}`)
+	req, _ := http.NewRequest("POST", "/events", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
+
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	var m map[string]interface{}
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	if m["operation"] != "saveuser" {
+		t.Errorf("Expected event name to be 'saveuser'. Got '%v'", m["operation"])
+	}
+
+	if m["description"] != "add new user on the system" {
+		t.Errorf("Expected event description to be 'add new user on the system'. Got '%v'", m["description"])
+	}
+
+}
+
+func TestFindEventByOperation(t *testing.T) {
+	clearTable()
+	loadEvents()
+	req, _ := http.NewRequest("GET", "/events/operation1", nil)
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusOK, response.Code)
 }

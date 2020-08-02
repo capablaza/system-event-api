@@ -62,7 +62,7 @@ func (a *App) addEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response(w, event, http.StatusOK)
+	response(w, event, http.StatusCreated)
 }
 
 func validateEventInputData(newEvent Event) error {
