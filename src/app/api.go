@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"time"
