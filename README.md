@@ -28,6 +28,17 @@ enviroment variables for database
 docker run -p 9090:5000 --name system-api-con -e DbHost=host.docker.internal -e DbPort=5432 -e DbUser=logmaster -e  DbPassword=9psql%Ple1 -e DbName=events -d system-api-img
 ```
 
+## Running test
+For run test you need prepare first the database, the process is so easy. You need run in postgres database the next sentences: 
+
+```
+CREATE DATABASE events_test;
+GRANT ALL PRIVILEGES ON DATABASE events_test TO logmaster;
+```
+
+
+
+
 ## TODO
 
 * benchmark test

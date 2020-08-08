@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func (a *App) findEventByOperation(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +54,13 @@ func (a *App) addEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentTime := time.Now()
+	currentTime, err := TimeIn(time.Now(), "Local")
+
+	if err != nil {
+		responseError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	event.CreatedAt = currentTime
 
 	defer r.Body.Close()
@@ -64,6 +71,14 @@ func (a *App) addEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response(w, event, http.StatusCreated)
+}
+
+func TimeIn(t time.Time, name string) (time.Time, error) {
+	loc, err := time.LoadLocation(name)
+	if err == nil {
+		t = t.In(loc)
+	}
+	return t, err
 }
 
 func validateEventInputData(newEvent Event) error {

@@ -52,7 +52,14 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 }
 
 func TestMain(m *testing.M) {
-	a.Initialize(os.Getenv(DbHost), os.Getenv(DbPort), os.Getenv(DbUser), os.Getenv(DbPassword), os.Getenv(DbName))
+
+	dbName := "events"
+	dbUser := "logmaster"
+	dbHost := "localhost"
+	dbPort := "5432"
+	dbPassword := "9psql%Ple1"
+
+	a.Initialize(dbHost, dbPort, dbUser, dbPassword, dbName)
 	droptable()
 	ensureTableExists()
 	code := m.Run()

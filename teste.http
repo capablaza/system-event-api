@@ -4,12 +4,12 @@
 #  --request POST
 #  --data '{"username":"xyz","password":"xyz"}'
 #  http://localhost:3000/api/login
-POST http://localhost:9090/events
+POST http://localhost:5000/events
 Content-Type: application/json
 
 {
-  "operation": "op1212",
-  "description" : "services testing for simple test"
+  "operation": "email_send2",
+  "description" : "email about new account for user : u94842"
 }
 
 

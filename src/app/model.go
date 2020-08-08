@@ -11,7 +11,7 @@ func (e *Event) getEventByOperation(db *sql.DB) error {
 }
 
 func getAllEvents(db *sql.DB) ([]Event, error) {
-	queryStr := "SELECT operation, description, created_at FROM event"
+	queryStr := "SELECT operation, description, created_at FROM event order by created_at desc"
 	rows, err := db.Query(queryStr)
 
 	if err != nil {
@@ -31,10 +31,12 @@ func getAllEvents(db *sql.DB) ([]Event, error) {
 			return nil, err
 		}
 
+		createDateTranslated := translateDate(created.Format("02 Jan 2006 15:04:05"))
 		event := Event{
-			Operation:   op,
-			Description: desc,
-			CreatedAt:   created,
+			Operation:     op,
+			Description:   desc,
+			CreatedAt:     created,
+			OperationDate: createDateTranslated,
 		}
 
 		eventsCreated = append(eventsCreated, event)

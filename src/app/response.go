@@ -21,6 +21,7 @@ func responseError(w http.ResponseWriter, msgDescription string, status int) {
 
 func prepareResponse(w http.ResponseWriter, status int) http.ResponseWriter {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(status)
 	return w
 }
