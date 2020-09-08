@@ -1,10 +1,17 @@
 pipeline {
-    agent { dockerfile true }
-    stages {
-        stage('Test') {
-            steps {
-                sh 'go version'
-            }
-        }
+  agent none
+  stages {
+  	stage('Docker Build') {
+      agent any
+      steps {
+        sh 'docker build -t system-api-img .'
+      }
     }
+    stage('Docker Run') {
+      agent any
+      steps {
+        sh 'docker run -p 9090:5000 --name system-api-con -e DbHost=host.docker.internal -e DbPort=5432 -e DbUser=logmaster -e  DbPassword=9psql%Ple1 -e DbName=events -d system-api-img'
+      }
+    }
+  }
 }
