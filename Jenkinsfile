@@ -4,6 +4,7 @@ pipeline {
 
     stage('Initialize')
     {        
+        def dockerHome = tool '/usr/local'
         env.PATH = "${dockerHome}/bin:${env.PATH}"
     }
   	stage('Checkout code') {
