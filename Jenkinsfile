@@ -1,6 +1,11 @@
 pipeline {  
   agent none
   stages {
+
+    stage('Initialize')
+    {        
+        env.PATH = "${dockerHome}/bin:${env.PATH}"
+    }
   	stage('Checkout code') {
         agent any
         steps {
