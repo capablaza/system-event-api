@@ -1,11 +1,13 @@
 pipeline {  
   agent none
-  
-  environment {
-      PATH = $PATH:'/usr/local/bin'
-  }
-
   stages {
+
+    stage('prepare'){
+      steps{
+        sh 'set PATH=/usr/local/bin:$PATH'
+      }
+    }
+
   	stage('Checkout code') {
         agent any
         steps {
