@@ -1,8 +1,7 @@
 pipeline {  
   agent none
   environment {
-        PATH = '/usr/local/bin' + $PATH 
-        DB_ENGINE    = 'sqlite'
+        PATH = "/usr/local/bin" + $PATH 
     }
   stages {
   	stage('Checkout code') {
