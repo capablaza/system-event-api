@@ -12,7 +12,8 @@ pipeline {
     }
   	stage('Docker Build') {
       agent any
-      steps {      
+      steps {
+        echo "${env.PATH}"      
         sh 'docker build -t system-api-img .'
       }
     }
