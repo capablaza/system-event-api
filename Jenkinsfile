@@ -1,8 +1,12 @@
 pipeline {  
   agent none
-  environment {        
-      PATH = "/usr/local/bin:${PATH}"
-    }
+  environment {
+    APP_NAME =  "system-api"           
+    IMAGE_NAME = APP_NAME + "-img"  
+    CONTAINER_NAME = APP_NAME + "-con"
+    OUT_CONTAINER_PORT="9090"
+    IN_CONTAINER_PORT="5000"      
+  }
   stages {
   	stage('Checkout code') {
         agent any
@@ -13,14 +17,14 @@ pipeline {
   	stage('Docker Build') {
       agent any
       steps {
-        echo "${env.PATH}"      
-        sh 'docker build -t system-api-img .'
+        echo "${env.PATH}"              
+        sh "docker build -t ${IMAGE_NAME} -f Dockerfile ."
       }
     }
     stage('Docker Run') {
       agent any
-      steps {        
-        sh 'docker run -p 9090:5000 --name system-api-con -e DbHost=host.docker.internal -e DbPort=5432 -e DbUser=logmaster -e  DbPassword=9psql%Ple1 -e DbName=events -d system-api-img'
+      steps {                
+        sh "docker run -p ${OUT_CONTAINER_PORT}:${IN_CONTAINER_PORT} --name ${CONTAINER_NAME} -e DbHost=host.docker.internal -e DbPort=5432 -e DbUser=logmaster -e  DbPassword=9psql%Ple1 -e DbName=events -d ${IMAGE_NAME} &"
       }
     }
   }
