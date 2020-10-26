@@ -3,6 +3,7 @@ pipeline {
   stages {
 
     stage('prepare'){
+      agent any
       steps{
         sh 'set PATH=/usr/local/bin:$PATH'
       }
