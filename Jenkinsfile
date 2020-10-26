@@ -2,13 +2,6 @@ pipeline {
   agent none
   stages {
 
-    stage('prepare'){
-      agent any
-      steps{
-        sh 'set PATH=/usr/local/bin:$PATH'
-      }
-    }
-
   	stage('Checkout code') {
         agent any
         steps {
@@ -18,12 +11,14 @@ pipeline {
   	stage('Docker Build') {
       agent any
       steps {
+        sh 'set PATH=/usr/local/bin:$PATH'
         sh 'docker build -t system-api-img .'
       }
     }
     stage('Docker Run') {
       agent any
       steps {
+        sh 'set PATH=/usr/local/bin:$PATH'
         sh 'docker run -p 9090:5000 --name system-api-con -e DbHost=host.docker.internal -e DbPort=5432 -e DbUser=logmaster -e  DbPassword=9psql%Ple1 -e DbName=events -d system-api-img'
       }
     }
