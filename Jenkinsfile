@@ -2,8 +2,8 @@ pipeline {
   agent none
   environment {
     APP_NAME =  "system-api"           
-    IMAGE_NAME = APP_NAME + "-img"  
-    CONTAINER_NAME = APP_NAME + "-con"
+    IMAGE_NAME = $APP_NAME + "-img"  
+    CONTAINER_NAME = $APP_NAME + "-con"
     OUT_CONTAINER_PORT="9090"
     IN_CONTAINER_PORT="5000"      
   }
